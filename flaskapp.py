@@ -103,4 +103,4 @@ api.add_resource(Load, '/load')
 api.add_resource(Test,"/test")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=False,host='0.0.0.0')
