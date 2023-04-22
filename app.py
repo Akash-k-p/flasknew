@@ -84,7 +84,10 @@ class Getjson(Resource):
         # file.read()
         from tempfile import TemporaryFile
         file = TemporaryFile()
-        file.write(bfile)
+        try:
+            file.write(bfile)
+        except TypeError:
+            return {'message':"no file selected"}
         # print(type(file))
         if (file==None) :
             return {"message":"file not selected for jsonification"}
