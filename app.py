@@ -1,16 +1,16 @@
-# from flask import Flask, request,abort
+from flask import Flask, request,abort
 from flask_restful import Resource, Api
-from werkzeug.utils import secure_filename
-import os
-from marshmallow import Schema, fields
+# from werkzeug.utils import secure_filename
+# import os
+# from marshmallow import Schema, fields
 from classes import *
 
 app = Flask(__name__)
 api = Api(app)
 
-UPLOAD_FOLDER = r'C:\Users\91886\Desktop\intership\text_extraction\temp'
+# UPLOAD_FOLDER = r'C:\Users\91886\Desktop\intership\text_extraction\temp'
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-JSON_FILE = "data.json"
+# JSON_FILE = "data.json"
 # app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -18,11 +18,11 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-class BarQuerySchema(Schema):
-    key1 = fields.Str(required=True)
-    # key2 = fields.Str(required=True)
-
-schema = BarQuerySchema()
+# class BarQuerySchema(Schema):
+#     key1 = fields.Str(required=True)
+#     # key2 = fields.Str(required=True)
+#
+# schema = BarQuerySchema()
 
 bfile = None
 
@@ -52,7 +52,7 @@ class Load(Resource):
         #     # print(txt)# work is here
         global bfile
         bfile = file.read()
-        print(type(bfile))
+        # print(type(bfile))
         return {'message': 'File uploaded successfully','type':str(type(bfile))}, 200
 
 
@@ -85,12 +85,12 @@ class Getjson(Resource):
         from tempfile import TemporaryFile
         file = TemporaryFile()
         file.write(bfile)
-        print(type(file))
+        # print(type(file))
         if (file==None) :
             return {"message":"file not selected for jsonification"}
         extractor = AadhaarExtractor()
 
-        print(type(file))
+        # print(type(file))
         extractor.load(file)
         json = extractor.to_json()
         return json
