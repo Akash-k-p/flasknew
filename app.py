@@ -94,13 +94,19 @@ class Getjson(Resource):
         extractor.load(file)
         json = extractor.to_json()
         return json
+
 class Test(Resource):
     def get(self):
         return {'message':"success"}
 
+class Home(Resource):
+    def get(self):
+        return {'message':"YAAAAAAAAAAAY!!!!!!!!"}
+
 api.add_resource(Getjson, '/getjson')
 api.add_resource(Load, '/load')
 api.add_resource(Test,"/test")
+api.add_resource(Home,"/")
 
 if __name__ == '__main__':
-    app.run(debug=False,host='0.0.0.0')
+    app.run(debug=False,host='0.0.0.0',port=8080)
