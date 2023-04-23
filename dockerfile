@@ -11,4 +11,6 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
+
 CMD ["gunicorn", "app:app"]
