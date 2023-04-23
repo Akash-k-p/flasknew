@@ -13,4 +13,4 @@ COPY . .
 
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
 
-CMD ["gunicorn", "app:app"]
+CMD ["gunicorn", "app:app","--timeout","120"]
