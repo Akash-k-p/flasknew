@@ -119,6 +119,8 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             return dob
 
         def validate_aadhaar_numbers(candidate):
+            if candidate == None :
+                return True
             candidate = candidate.replace(' ', '')
             # The multiplication table
             d = [
@@ -231,9 +233,12 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
                 else:
                     maindict['name'] = None
             # extracted text cleaned up :FIXED
-        maindict['name'] = clean_words(maindict['name'])
-        maindict['dob'] = clean_dob(maindict['dob'])
-        maindict['aadhaar_no'] = maindict['aadhaar_no'].strip()
+        if (maindict['name']!=None):
+            maindict['name'] = clean_words(maindict['name'])
+        if maindict['dob']!=None:
+            maindict['dob'] = clean_dob(maindict['dob'])
+        if maindict['aadhaar_no']!=None:
+            maindict['aadhaar_no'] = maindict['aadhaar_no'].strip()
 
         #  validated aadhaar card number :FIXED
         if not validate_aadhaar_numbers(maindict['aadhaar_no']) :
