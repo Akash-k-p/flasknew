@@ -98,6 +98,18 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
 
         MODEL_PATH = r"C:\Users\91886\Desktop\intership\text_extraction\python files\best.pt"
 
+        def filter_tuples(lst):
+            d = {}
+            for tup in lst:
+                key = tup[1]
+                value = tup[2]
+                if key not in d:
+                    d[key] = (tup, value)
+                else:
+                    if value > d[key][1]:
+                        d[key] = (tup, value)
+            return [tup for key, (tup, value) in d.items()]
+
         def clean_words(name):
             name = name.replace("8", "B")
             name = name.replace("0", "D")
@@ -148,6 +160,8 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             ]
             # inverse table inv
             inv = [0, 4, 3, 2, 1, 5, 6, 7, 8, 9]
+            print("sonddffsddsdd")
+            print(len(candidate))
             lastDigit = candidate[-1]
             c = 0
             array = [int(i) for i in candidate if i != ' ']
@@ -188,7 +202,7 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
                 # cv2.putText(img, str(cls), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 2, 255)
                 roi = img[y1:y2, x1:x2]
                 #        rois.append(roi)
-                tple = (roi, cls)
+                tple = (roi, cls,confidence)
                 roidata.append(tple)
         # cv2.imshow("s", img)
         # cv2.waitKey(0)
@@ -199,58 +213,51 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
                  2: "gender",
                  3: "name",
                  4: "address"}
+        roidata = filter_tuples(roidata)
         maindict = {}
-        maindict['aadhaar_no'] = maindict['dob'] = maindict['gender'] = maindict['name'] = maindict['address'] = maindict['phonenumber'] = maindict['vid'] = maindict['enrollment_number'] = None
-
+        maindict['aadhaar_no'] = maindict['dob'] = maindict['gender'] = maindict['address'] = maindict['name'] = maindict['phonenumber'] = maindict['vid'] = maindict['enrollment_number'] = None
         for tple in roidata:
             cls = tple[1]
             data = tple[0]
             info = pytesseract.image_to_string(data)
             # if there are more than one of the same class, then assign it to none :FIXED
+            # FIXED: if there more than one of the same class, then select the one with highest confidence
             if cls == 0:
-                if 'aadhaar_no' not in maindict.keys():
-                    aadhaar_no = info
-                    maindict['aadhaar_no'] = aadhaar_no
-                else:
-                    maindict['aadhaar_no'] = None
+                    maindict['aadhaar_no'] = info
+
             elif cls == 1:
-                if 'dob' not in maindict.keys():
-                    dob = info
-                    maindict['dob'] = dob
-                else:
-                    maindict['dob'] = None
+                    maindict['dob'] = info
 
             elif cls == 2:
-                if 'gender' not in maindict.keys():
-                    gender = info
-                    maindict['gender'] = gender
-                else:
-                    maindict['gender'] = None
+                    maindict['gender'] = info
+
             elif cls == 3:
-                if 'name' not in maindict.keys():
-                    name = info
-                    maindict['name'] = name
-                else:
-                    maindict['name'] = None
+                    maindict['name'] = info
+
             # extracted text cleaned up :FIXED
         if (maindict['name']!=None):
             maindict['name'] = clean_words(maindict['name'])
+
         if maindict['dob']!=None:
             maindict['dob'] = clean_dob(maindict['dob'])
+
         if maindict['aadhaar_no']!=None:
             maindict['aadhaar_no'] = maindict['aadhaar_no'].strip()
 
         #  validated aadhaar card number :FIXED
-        if not validate_aadhaar_numbers(maindict['aadhaar_no']) :
-            maindict['aadhar_no'] = "INVALID AADHAAR NUMBER"
-
+        if len(maindict['aadhaar_no']) == 12:
+            if not validate_aadhaar_numbers(maindict['aadhaar_no']) :
+                maindict['aadhar_no'] = "INVALID AADHAAR NUMBER"
+        else:
+            maindict['aadhaar_no'] = None
 
 
         # TODO extract these fields too
-        maindict['phonenumber'] = None
-        maindict['vid'] = None
-        maindict['enrollment_no'] = None
+        # maindict['phonenumber'] = None
+        # maindict['vid'] = None
+        # maindict['enrollment_no'] = None
 
+        print(maindict)
         return maindict
 
     def extract_from_pdf(self, file):
@@ -331,8 +338,9 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
 
 if __name__ == '__main__':
     obj = AadhaarExtractor()
-    obj.load("EAadhaar_og.pdf")
-    obj.jsonify("jsonn.json")
+    file = open(r"C:\Users\91886\Desktop\cardF.jpg",'r')
+    obj.load(file)
+    print(obj.to_json())
 
     # def extract_from_images(self, path):
     #     import json
