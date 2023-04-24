@@ -198,6 +198,8 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
                  3: "name",
                  4: "address"}
         maindict = {}
+        maindict['aadhaar_no'] = maindict['dob'] = maindict['gender'] = maindict['name'] = maindict['address'] = maindict['phonenumber'] = maindict['vid'] = maindict['enrollment_number'] = None
+
         for tple in roidata:
             cls = tple[1]
             data = tple[0]
