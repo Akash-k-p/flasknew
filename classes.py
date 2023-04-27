@@ -95,7 +95,9 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
         from ultralytics import YOLO
         import cv2
         import pytesseract
+        import logging
 
+        logging.basicConfig(level=logging.NOTSET)
         MODEL_PATH = r"C:\Users\91886\Desktop\intership\text_extraction\python files\best.pt"
 
         def filter_tuples(lst):
@@ -116,6 +118,7 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             name = name.replace("6", "G")
             name = name.replace("1", "I")
             name = name.replace('5', 'S')
+
             return name
 
         def clean_dob(dob):
@@ -160,8 +163,8 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             ]
             # inverse table inv
             inv = [0, 4, 3, 2, 1, 5, 6, 7, 8, 9]
-            print("sonddffsddsdd")
-            print(len(candidate))
+            # print("sonddffsddsdd")
+            # print(len(candidate))
             lastDigit = candidate[-1]
             c = 0
             array = [int(i) for i in candidate if i != ' ']
@@ -213,13 +216,19 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
                  2: "gender",
                  3: "name",
                  4: "address"}
+        logging.info('BEFORE FILTERING :')
+        logging.info(len(roidata))
         roidata = filter_tuples(roidata)
         maindict = {}
         maindict['aadhaar_no'] = maindict['dob'] = maindict['gender'] = maindict['address'] = maindict['name'] = maindict['phonenumber'] = maindict['vid'] = maindict['enrollment_number'] = None
+        logging.info('AFTER FILTERING :')
+        logging.info(len(roidata))
         for tple in roidata:
             cls = tple[1]
             data = tple[0]
-            info = pytesseract.image_to_string(data)
+            data = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+            info = pytesseract.image_to_string(data).strip()
+            logging.info(str(cls)+'-'+info)
             # if there are more than one of the same class, then assign it to none :FIXED
             # FIXED: if there more than one of the same class, then select the one with highest confidence
             if cls == 0:
@@ -234,6 +243,9 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             elif cls == 3:
                     maindict['name'] = info
 
+            elif cls ==4:
+                    maindict['address'] = info
+
             # extracted text cleaned up :FIXED
         if (maindict['name']!=None):
             maindict['name'] = clean_words(maindict['name'])
@@ -242,14 +254,17 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
             maindict['dob'] = clean_dob(maindict['dob'])
 
         if maindict['aadhaar_no']!=None:
-            maindict['aadhaar_no'] = maindict['aadhaar_no'].strip()
-
+            maindict['aadhaar_no'] = maindict['aadhaar_no'].replace(' ','')
         #  validated aadhaar card number :FIXED
-        if len(maindict['aadhaar_no']) == 12:
-            if not validate_aadhaar_numbers(maindict['aadhaar_no']) :
-                maindict['aadhar_no'] = "INVALID AADHAAR NUMBER"
-        else:
-            maindict['aadhaar_no'] = None
+        if maindict['aadhaar_no'] != None:
+            if len(maindict['aadhaar_no']) == 12:
+                try:
+                    if not validate_aadhaar_numbers(maindict['aadhaar_no']) :
+                        maindict['aadhar_no'] = "INVALID AADHAAR NUMBER"
+                except ValueError:
+                    maindict['aadhaar_no'] = None
+            else:
+                maindict['aadhaar_no'] = None
 
 
         # TODO extract these fields too
@@ -257,7 +272,7 @@ class AadhaarExtractor:  # assume inputs are file name and not cv2 images       
         # maindict['vid'] = None
         # maindict['enrollment_no'] = None
 
-        print(maindict)
+        logging.info(maindict)
         return maindict
 
     def extract_from_pdf(self, file):
